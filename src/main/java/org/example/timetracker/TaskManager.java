@@ -5,15 +5,17 @@ import java.util.Optional;
 public class TaskManager {
     private ArrayList<Task> activeTasks;
     private ArrayList<Task> taskHistory;
+    private TaskStorage taskStorage;
 
     public TaskManager() {
-        this.activeTasks = new ArrayList<>();
-        this.taskHistory = new ArrayList<>();
+        this.taskStorage = new TaskStorage("tasks.dat");
+        this.activeTasks = taskStorage.loadTasks("active_tasks.dat");
+        this.taskHistory = taskStorage.loadTasks("task_history.dat");
     }
 
     // Iniciar uma nova tarefa
-    public Task startTask(String name, String category) {
-        Task newTask = new Task(name, category);
+    public Task startTask(String name) {
+        Task newTask = new Task(name);
         newTask.start();
         activeTasks.add(newTask);
         return newTask;
@@ -68,12 +70,17 @@ public class TaskManager {
         }
         return total;
     }
+    public void saveTasks() {
+        taskStorage.saveTasks(activeTasks, "active_tasks.dat");
+        taskStorage.saveTasks(taskHistory, "task_history.dat");
+    }
     public void logTask(Task task) {
         if (task.getElapsedTimeInMinutes() == 0) {
             activeTasks.add(task);
         } else {
             taskHistory.add(task);
         }
+        saveTasks();  // Salvar tarefas após cada log
     }
 
 }

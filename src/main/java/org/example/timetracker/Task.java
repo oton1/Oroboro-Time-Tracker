@@ -10,7 +10,7 @@ public class Task {
     private long totalElapsedTime; // em milissegundos
     private boolean isRunning;
 
-    public Task(String name, String category) {
+    public Task(String name) {
         this.name = name;
         this.category = category;
         this.totalElapsedTime = 0;
@@ -54,8 +54,15 @@ public class Task {
     // Obter o tempo total gasto na tarefa em minutos
     public long getElapsedTimeInMinutes() {
         long elapsedTime = this.totalElapsedTime;
-        if (isRunning) {
-            elapsedTime += (System.currentTimeMillis() - startTime);
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        try {
+            Date currentDate = sdf.parse(sdf.format(new Date()));
+            long currentTime = currentDate.getTime();
+            if (isRunning) {
+                elapsedTime += (currentTime - startTime);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
         return elapsedTime / 60000; // Converter para minutos
     }
@@ -82,6 +89,9 @@ public class Task {
     }
     @Override
     public String toString() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        String startTimeStr = sdf.format(new Date(startTime));
+        String endTimeStr = isRunning ? "Agora" : sdf.format(new Date(endTime));
         long elapsedTimeInMinutes = getElapsedTimeInMinutes();
         String timeStr;
 
@@ -90,14 +100,28 @@ public class Task {
         } else {
             long hours = elapsedTimeInMinutes / 60;
             long minutes = elapsedTimeInMinutes % 60;
-            timeStr = String.format("%02d:%02d", hours, minutes);
+            if (minutes == 0) {
+                timeStr = hours + "h";
+            } else {
+                timeStr = String.format("%dh %02dmin", hours, minutes);
+            }
         }
 
-        return "Nome: " + this.name + ", Tempo: " + timeStr;
+        return startTimeStr + " - " + endTimeStr + " | " + this.name + " | " + timeStr;
     }
+
 
     public void setTime(String startTimeStr, String endTimeStr) {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+
+        // Verificar e ajustar o formato da hora
+        if (!startTimeStr.matches("\\d{2}:\\d{2}")) {
+            startTimeStr = "0" + startTimeStr + ":00";
+        }
+        if (!endTimeStr.matches("\\d{2}:\\d{2}") && !endTimeStr.isEmpty()) {
+            endTimeStr = "0" + endTimeStr + ":00";
+        }
+
         try {
             Date startDate = sdf.parse(startTimeStr);
             Date endDate = endTimeStr.isEmpty() ? null : sdf.parse(endTimeStr);
@@ -115,6 +139,6 @@ public class Task {
         }
     }
 
-
 }
+
 
