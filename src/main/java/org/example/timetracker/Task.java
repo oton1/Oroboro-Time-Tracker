@@ -22,7 +22,6 @@ public class Task implements Serializable {
         this.isRunning = false;
     }
 
-    // Iniciar a tarefa
     public void start() {
         if (!isRunning) {
             this.startTime = System.currentTimeMillis();
@@ -30,14 +29,21 @@ public class Task implements Serializable {
         }
     }
 
+
     // Parar a tarefa
     public void stop() {
         if (isRunning) {
             this.endTime = System.currentTimeMillis();
-            this.totalElapsedTime += (endTime - startTime);
+            long elapsed = endTime - startTime;
+            if (elapsed > 0) {
+                this.totalElapsedTime += elapsed;
+            }
             this.isRunning = false;
         }
     }
+
+
+
 
     // Pausar a tarefa
     public void pause() {
@@ -57,20 +63,15 @@ public class Task implements Serializable {
     }
 
     // Obter o tempo total gasto na tarefa em minutos
+    // Obter o tempo total gasto na tarefa em minutos
     public long getElapsedTimeInMinutes() {
         long elapsedTime = this.totalElapsedTime;
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-        try {
-            Date currentDate = sdf.parse(sdf.format(new Date()));
-            long currentTime = currentDate.getTime();
-            if (isRunning) {
-                elapsedTime += (currentTime - startTime);
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
+        if (isRunning) {
+            elapsedTime += (System.currentTimeMillis() - startTime);
         }
         return elapsedTime / 60000; // Converter para minutos
     }
+
 
     // Getters e setters para nome e categoria
     public String getName() {

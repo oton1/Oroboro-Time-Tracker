@@ -1,4 +1,5 @@
 package org.example.timetracker;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -12,7 +13,19 @@ public class TimeTrackerGUI {
 
     public TimeTrackerGUI(TaskManager taskManager) {
         this.taskManager = taskManager;
+        this.listModel = new DefaultListModel<>();
         initialize();
+
+        // Limpar listModel para evitar duplicatas
+        listModel.clear();
+
+        // Carregar tarefas salvas anteriormente
+        for (Task task : taskManager.getActiveTasks()) {
+            listModel.addElement(task);
+        }
+        for (Task task : taskManager.getTaskHistory()) {
+            listModel.addElement(task);
+        }
     }
 
     private void initialize() {
@@ -25,19 +38,16 @@ public class TimeTrackerGUI {
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setBackground(Color.DARK_GRAY);
 
-        // Top Panel
         JPanel topPanel = new JPanel();
         topPanel.setBackground(Color.GRAY);
         JLabel titleLabel = new JLabel("Time Tracker");
         titleLabel.setForeground(Color.WHITE);
         topPanel.add(titleLabel);
 
-        // Center Panel
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBackground(Color.DARK_GRAY);
 
-        listModel = new DefaultListModel<>();
         taskList = new JList<>(listModel);
         taskList.setBackground(Color.GRAY);
         taskList.setForeground(Color.WHITE);
@@ -53,9 +63,13 @@ public class TimeTrackerGUI {
         JButton logButton = new JButton("Log Task");
         styleButton(logButton);
 
+        JButton deleteButton = new JButton("Delete Task");
+        styleButton(deleteButton);
+
         centerPanel.add(startButton);
         centerPanel.add(stopButton);
         centerPanel.add(logButton);
+        centerPanel.add(deleteButton);
         centerPanel.add(scrollPane);
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
@@ -63,38 +77,37 @@ public class TimeTrackerGUI {
 
         frame.add(mainPanel);
 
-        // Add functionality
-        startButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String name = JOptionPane.showInputDialog("Nome da Tarefa:");
-                Task newTask = taskManager.startTask(name);
-                listModel.addElement(newTask);
+        startButton.addActionListener(e -> {
+            String name = JOptionPane.showInputDialog("Nome da Tarefa:");
+            Task newTask = taskManager.startTask(name);
+            listModel.addElement(newTask);
+        });
+
+        stopButton.addActionListener(e -> {
+            Task selectedTask = taskList.getSelectedValue();
+            if (selectedTask != null) {
+                taskManager.stopTask(selectedTask);
+                listModel.removeElement(selectedTask);
+                listModel.addElement(selectedTask);
             }
         });
 
-        stopButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Task selectedTask = taskList.getSelectedValue();
-                if (selectedTask != null) {
-                    taskManager.stopTask(selectedTask);
-                    listModel.removeElement(selectedTask);
-                }
+        deleteButton.addActionListener(e -> {
+            Task selectedTask = taskList.getSelectedValue();
+            if (selectedTask != null) {
+                taskManager.deleteTask(selectedTask);
+                listModel.removeElement(selectedTask);
             }
         });
 
-        logButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String name = JOptionPane.showInputDialog("Nome da Tarefa:");
-                String startTimeStr = JOptionPane.showInputDialog("Hora de início (HH:MM):");
-                String endTimeStr = JOptionPane.showInputDialog("Hora de término (HH:MM):");
-                Task newTask = new Task(name);
-                newTask.setTime(startTimeStr, endTimeStr);
-                taskManager.logTask(newTask);
-                listModel.addElement(newTask);
-            }
+        logButton.addActionListener(e -> {
+            String name = JOptionPane.showInputDialog("Nome da Tarefa:");
+            String startTimeStr = JOptionPane.showInputDialog("Hora de início (HH:MM):");
+            String endTimeStr = JOptionPane.showInputDialog("Hora de término (HH:MM):");
+            Task newTask = new Task(name);
+            newTask.setTime(startTimeStr, endTimeStr);
+            taskManager.logTask(newTask);
+            listModel.addElement(newTask);
         });
     }
 
@@ -114,6 +127,9 @@ public class TimeTrackerGUI {
         TaskManager taskManager = new TaskManager();
         TimeTrackerGUI gui = new TimeTrackerGUI(taskManager);  // Inicializa listModel
 
+        // Limpar listModel para evitar duplicatas
+        listModel.clear();
+
         // Carregar tarefas salvas anteriormente
         for (Task task : taskManager.getActiveTasks()) {
             listModel.addElement(task);
@@ -127,6 +143,5 @@ public class TimeTrackerGUI {
         // Adicionar hook de desligamento para salvar tarefas
         Runtime.getRuntime().addShutdownHook(new Thread(taskManager::saveTasks));
     }
+
 }
-
-

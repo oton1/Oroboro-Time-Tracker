@@ -8,9 +8,14 @@ public class TaskManager {
     private TaskStorage taskStorage;
 
     public TaskManager() {
-        this.taskStorage = new TaskStorage("tasks.dat");
+        this.taskStorage = new TaskStorage();
         this.activeTasks = taskStorage.loadTasks("active_tasks.dat");
         this.taskHistory = taskStorage.loadTasks("task_history.dat");
+    }
+
+    public void saveTasks() {
+        taskStorage.saveTasks(activeTasks, "active_tasks.dat");
+        taskStorage.saveTasks(taskHistory, "task_history.dat");
     }
 
     // Iniciar uma nova tarefa
@@ -26,7 +31,6 @@ public class TaskManager {
         if (task != null && task.isRunning()) {
             task.stop();
             taskHistory.add(task);
-            activeTasks.remove(task);
         }
     }
 
@@ -42,6 +46,11 @@ public class TaskManager {
         if (task != null && !task.isRunning()) {
             task.resume();
         }
+    }
+
+    public void deleteTask(Task task) {
+        activeTasks.remove(task);
+        taskHistory.remove(task);
     }
 
     // Obter uma tarefa ativa pelo nome
@@ -70,10 +79,7 @@ public class TaskManager {
         }
         return total;
     }
-    public void saveTasks() {
-        taskStorage.saveTasks(activeTasks, "active_tasks.dat");
-        taskStorage.saveTasks(taskHistory, "task_history.dat");
-    }
+
     public void logTask(Task task) {
         if (task.getElapsedTimeInMinutes() == 0) {
             activeTasks.add(task);
