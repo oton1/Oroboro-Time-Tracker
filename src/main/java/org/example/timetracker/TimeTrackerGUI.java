@@ -3,32 +3,33 @@ package org.example.timetracker;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class TimeTrackerGUI {
     private JFrame frame;
     private JList<Task> taskList;
-    private static DefaultListModel<Task> listModel;
+    private DefaultListModel<Task> listModel;
     private TaskManager taskManager;
 
     public TimeTrackerGUI(TaskManager taskManager) {
         this.taskManager = taskManager;
         this.listModel = new DefaultListModel<>();
         initialize();
-
-        // Limpar listModel para evitar duplicatas
-        listModel.clear();
-
-        // Carregar tarefas salvas anteriormente
-        for (Task task : taskManager.getActiveTasks()) {
-            listModel.addElement(task);
-        }
-        for (Task task : taskManager.getTaskHistory()) {
-            listModel.addElement(task);
-        }
     }
 
     private void initialize() {
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Dark Mode Colors
+        Color bgColor = new Color(40, 40, 40);
+        Color fgColor = new Color(220, 220, 220);
+
+        // Modern Font
+        Font modernFont = new Font("Arial", Font.PLAIN, 16);
+
         frame = new JFrame("Time Tracker");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 400);
@@ -36,40 +37,50 @@ public class TimeTrackerGUI {
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
-        mainPanel.setBackground(Color.DARK_GRAY);
+        mainPanel.setBackground(bgColor);
 
         JPanel topPanel = new JPanel();
-        topPanel.setBackground(Color.GRAY);
+        topPanel.setBackground(bgColor);
         JLabel titleLabel = new JLabel("Time Tracker");
-        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setForeground(fgColor);
+        titleLabel.setFont(modernFont);
         topPanel.add(titleLabel);
 
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setBackground(Color.DARK_GRAY);
+        centerPanel.setBackground(bgColor);
 
         taskList = new JList<>(listModel);
-        taskList.setBackground(Color.GRAY);
-        taskList.setForeground(Color.WHITE);
+        taskList.setBackground(bgColor);
+        taskList.setForeground(fgColor);
+        taskList.setFont(modernFont);
         JScrollPane scrollPane = new JScrollPane(taskList);
-        scrollPane.setPreferredSize(new Dimension(550, 200));
+        scrollPane.setPreferredSize(new Dimension(550, 150));  // Reduced height
 
         JButton startButton = new JButton("Start Task");
-        styleButton(startButton);
-
         JButton stopButton = new JButton("Stop Task");
-        styleButton(stopButton);
-
         JButton logButton = new JButton("Log Task");
-        styleButton(logButton);
-
         JButton deleteButton = new JButton("Delete Task");
-        styleButton(deleteButton);
 
-        centerPanel.add(startButton);
-        centerPanel.add(stopButton);
-        centerPanel.add(logButton);
-        centerPanel.add(deleteButton);
+        // Apply modern font and dark mode to buttons
+        for (JButton btn : new JButton[]{startButton, stopButton, logButton, deleteButton}) {
+            btn.setFont(modernFont);
+            btn.setBackground(bgColor);
+            btn.setForeground(fgColor);
+        }
+
+        // Create a panel for buttons and set layout
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout());
+        buttonPanel.setBackground(bgColor);
+
+        // Add buttons to the button panel
+        buttonPanel.add(startButton);
+        buttonPanel.add(stopButton);
+        buttonPanel.add(logButton);
+        buttonPanel.add(deleteButton);
+
+        centerPanel.add(buttonPanel);  // Add button panel to center panel
         centerPanel.add(scrollPane);
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
@@ -77,13 +88,13 @@ public class TimeTrackerGUI {
 
         frame.add(mainPanel);
 
-        startButton.addActionListener(e -> {
+        startButton.addActionListener((ActionEvent e) -> {
             String name = JOptionPane.showInputDialog("Nome da Tarefa:");
             Task newTask = taskManager.startTask(name);
             listModel.addElement(newTask);
         });
 
-        stopButton.addActionListener(e -> {
+        stopButton.addActionListener((ActionEvent e) -> {
             Task selectedTask = taskList.getSelectedValue();
             if (selectedTask != null) {
                 taskManager.stopTask(selectedTask);
@@ -92,7 +103,7 @@ public class TimeTrackerGUI {
             }
         });
 
-        deleteButton.addActionListener(e -> {
+        deleteButton.addActionListener((ActionEvent e) -> {
             Task selectedTask = taskList.getSelectedValue();
             if (selectedTask != null) {
                 taskManager.deleteTask(selectedTask);
@@ -100,7 +111,7 @@ public class TimeTrackerGUI {
             }
         });
 
-        logButton.addActionListener(e -> {
+        logButton.addActionListener((ActionEvent e) -> {
             String name = JOptionPane.showInputDialog("Nome da Tarefa:");
             String startTimeStr = JOptionPane.showInputDialog("Hora de início (HH:MM):");
             String endTimeStr = JOptionPane.showInputDialog("Hora de término (HH:MM):");
@@ -111,37 +122,16 @@ public class TimeTrackerGUI {
         });
     }
 
-    private void styleButton(JButton button) {
-        button.setBackground(Color.GRAY);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setFont(new Font("Arial", Font.BOLD, 16));
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-    }
-
     public void show() {
         frame.setVisible(true);
     }
 
     public static void main(String[] args) {
         TaskManager taskManager = new TaskManager();
-        TimeTrackerGUI gui = new TimeTrackerGUI(taskManager);  // Inicializa listModel
-
-        // Limpar listModel para evitar duplicatas
-        listModel.clear();
-
-        // Carregar tarefas salvas anteriormente
-        for (Task task : taskManager.getActiveTasks()) {
-            listModel.addElement(task);
-        }
-        for (Task task : taskManager.getTaskHistory()) {
-            listModel.addElement(task);
-        }
+        TimeTrackerGUI gui = new TimeTrackerGUI(taskManager);
 
         gui.show();
 
-        // Adicionar hook de desligamento para salvar tarefas
         Runtime.getRuntime().addShutdownHook(new Thread(taskManager::saveTasks));
     }
-
 }
