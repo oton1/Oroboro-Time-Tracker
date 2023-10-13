@@ -1,8 +1,13 @@
 package org.example.timetracker;
+import java.io.Serial;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.Date;
-public class Task {
+import java.io.Serializable;
+
+public class Task implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private String name;
     private String category;
     private long startTime;

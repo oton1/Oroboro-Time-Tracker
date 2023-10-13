@@ -112,6 +112,7 @@ public class TimeTrackerGUI {
 
     public static void main(String[] args) {
         TaskManager taskManager = new TaskManager();
+        TimeTrackerGUI gui = new TimeTrackerGUI(taskManager);  // Inicializa listModel
 
         // Carregar tarefas salvas anteriormente
         for (Task task : taskManager.getActiveTasks()) {
@@ -121,7 +122,6 @@ public class TimeTrackerGUI {
             listModel.addElement(task);
         }
 
-        TimeTrackerGUI gui = new TimeTrackerGUI(taskManager);
         gui.show();
 
         // Adicionar hook de desligamento para salvar tarefas
