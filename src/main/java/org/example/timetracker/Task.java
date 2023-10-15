@@ -1,6 +1,5 @@
 package org.example.timetracker;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -9,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class Task implements Serializable {
-    @Serial
+   // @Serial
     private static final long serialVersionUID = 1L;
     private String name;
     private LocalDate date;
@@ -103,6 +102,19 @@ public class Task implements Serializable {
     public void setTime(String startTimeStr, String endTimeStr) {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         try {
+            // Garante que as horas e minutos tenham dois dígitos
+            String[] startParts = startTimeStr.split(":");
+            String[] endParts = endTimeStr.split(":");
+
+            String startHour = (startParts[0].length() == 1) ? "0" + startParts[0] : startParts[0];
+            String startMinute = (startParts.length > 1) ? startParts[1] : "00";
+
+            String endHour = (endParts[0].length() == 1) ? "0" + endParts[0] : endParts[0];
+            String endMinute = (endParts.length > 1) ? endParts[1] : "00";
+
+            startTimeStr = startHour + ":" + startMinute;
+            endTimeStr = endHour + ":" + endMinute;
+
             Date startDate = sdf.parse(startTimeStr);
             Date endDate = sdf.parse(endTimeStr);
             this.startTime = startDate.getTime();
@@ -113,4 +125,6 @@ public class Task implements Serializable {
             e.printStackTrace();
         }
     }
+
+
 }

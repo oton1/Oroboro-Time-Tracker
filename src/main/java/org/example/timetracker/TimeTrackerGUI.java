@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-
 public class TimeTrackerGUI {
     private JFrame frame;
     private JList<Task> taskList;
@@ -34,11 +33,11 @@ public class TimeTrackerGUI {
         Color fgColor = new Color(220, 220, 220);
 
         // Modern Font
-        Font modernFont = new Font("Arial", Font.PLAIN, 16);
+        Font modernFont = new Font("Helvetica", Font.PLAIN, 16);
 
-        frame = new JFrame("Gerenciador de tempo explorado");
+        frame = new JFrame("Gerenciador de exploração ☭");  // Símbolo de foice e martelo adicionado
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 400);
+        frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel();
@@ -47,10 +46,6 @@ public class TimeTrackerGUI {
 
         JPanel topPanel = new JPanel(new BorderLayout());  // Alterado para BorderLayout
         topPanel.setBackground(bgColor);
-        // JLabel titleLabel = new JLabel("");
-        //titleLabel.setForeground(fgColor);
-        //titleLabel.setFont(modernFont);
-        //topPanel.add(titleLabel, BorderLayout.CENTER);  // Adicionado ao centro
 
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
@@ -61,55 +56,50 @@ public class TimeTrackerGUI {
         taskList.setForeground(fgColor);
         taskList.setFont(modernFont);
         JScrollPane scrollPane = new JScrollPane(taskList);
-        scrollPane.setPreferredSize(new Dimension(550, 150));  // Reduced height
+        scrollPane.setPreferredSize(new Dimension(550, 150));
 
-        JButton startButton = new JButton("Start Task");
-        JButton stopButton = new JButton("Stop Task");
-        JButton logButton = new JButton("Log Task");
-        JButton deleteButton = new JButton("Delete Task");
+        JButton startButton = new JButton("Iniciar tarefa");
+        JButton stopButton = new JButton("Parar tarefa");
+        JButton logButton = new JButton("Logar tarefa");
+        JButton deleteButton = new JButton("Deletar tarefa");
         JButton backButton = new JButton("<");
         JButton forwardButton = new JButton(">");
         dateLabel = new JLabel(currentDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        Font dateFont = new Font("Helvetica", Font.PLAIN, 16);
+        dateLabel.setFont(dateFont);
+        dateLabel.setForeground(Color.WHITE);  // Mudar a cor para branco
 
 
-        // Apply modern font and dark mode to buttons
         for (JButton btn : new JButton[]{startButton, stopButton, logButton, deleteButton}) {
             btn.setFont(modernFont);
             btn.setBackground(bgColor);
             btn.setForeground(fgColor);
         }
 
-        // Create a panel for buttons and set layout
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout());
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(bgColor);
-        Insets insets = new Insets(0, 0, 0, 0);  // top, left, bottom, right
-        backButton.setMargin(insets);
-        forwardButton.setMargin(insets);
-
-        backButton.setPreferredSize(new Dimension(35, 35));
-        backButton.setMinimumSize(new Dimension(35, 35));
-        backButton.setMaximumSize(new Dimension(35, 35));
-
-        forwardButton.setPreferredSize(new Dimension(35, 35));
-        forwardButton.setMinimumSize(new Dimension(35, 35));
-        forwardButton.setMaximumSize(new Dimension(35, 35));
-
-        Font dateFont = new Font("Helvetica", Font.PLAIN, 16);
-        dateLabel.setFont(dateFont);
-        dateLabel.setForeground(Color.WHITE);
-
-        // Add buttons to the button panel
         buttonPanel.add(startButton);
         buttonPanel.add(stopButton);
         buttonPanel.add(logButton);
         buttonPanel.add(deleteButton);
 
-        centerPanel.add(buttonPanel);  // Add button panel to center panel
-        centerPanel.add(scrollPane);
+        backButton.setForeground(Color.WHITE);
+        backButton.setBackground(bgColor);
+        forwardButton.setForeground(Color.WHITE);
+        forwardButton.setBackground(bgColor);
+
+        JPanel dateNavigationPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        dateNavigationPanel.setBackground(bgColor);
+        dateNavigationPanel.add(backButton);
+        dateNavigationPanel.add(dateLabel);
+        dateNavigationPanel.add(forwardButton);
+
+        topPanel.add(dateNavigationPanel, BorderLayout.WEST);
+        topPanel.add(buttonPanel, BorderLayout.EAST);
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
+        centerPanel.add(scrollPane);
 
         frame.add(mainPanel);
 
@@ -174,7 +164,6 @@ public class TimeTrackerGUI {
             updateDateAndTasks();
         });
 
-        JPanel dateNavigationPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         dateNavigationPanel.setBackground(bgColor);
         dateNavigationPanel.add(backButton);
         dateNavigationPanel.add(dateLabel);
