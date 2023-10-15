@@ -1,25 +1,27 @@
 package org.example.timetracker;
 import java.io.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TaskStorage {
-    public void saveTasks(ArrayList<Task> tasks, String filePath) {
+    public void saveTasks(Map<LocalDate, ArrayList<Task>> tasksByDate, String filePath) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
-            oos.writeObject(tasks);
+            oos.writeObject(tasksByDate);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public ArrayList<Task> loadTasks(String filePath) {
-        ArrayList<Task> tasks;
+    public Map<LocalDate, ArrayList<Task>> loadTasks(String filePath) {
+        Map<LocalDate, ArrayList<Task>> tasksByDate;
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
-            tasks = (ArrayList<Task>) ois.readObject();
+            tasksByDate = (Map<LocalDate, ArrayList<Task>>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            tasks = new ArrayList<>();
+            tasksByDate = new HashMap<>();
         }
-        return tasks;
+        return tasksByDate;
     }
 }
-
 

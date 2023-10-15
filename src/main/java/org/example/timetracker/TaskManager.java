@@ -1,92 +1,54 @@
 package org.example.timetracker;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 
 public class TaskManager {
-    private ArrayList<Task> activeTasks;
-    private ArrayList<Task> taskHistory;
+    private Map<LocalDate, ArrayList<Task>> tasksByDate;
     private TaskStorage taskStorage;
 
     public TaskManager() {
         this.taskStorage = new TaskStorage();
-        this.activeTasks = taskStorage.loadTasks("active_tasks.dat");
-        this.taskHistory = taskStorage.loadTasks("task_history.dat");
+        this.tasksByDate = taskStorage.loadTasks("task_history.dat");
     }
 
     public void saveTasks() {
-        taskStorage.saveTasks(activeTasks, "active_tasks.dat");
-        taskStorage.saveTasks(taskHistory, "task_history.dat");
+        taskStorage.saveTasks(tasksByDate, "task_history.dat");
     }
 
-    // Iniciar uma nova tarefa
-    public Task startTask(String name) {
-        Task newTask = new Task(name);
+    public Task startTask(String name, LocalDate date) {
+        Task newTask = new Task(name, date);
         newTask.start();
-        activeTasks.add(newTask);
+        tasksByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(newTask);
         return newTask;
     }
 
-    // Parar uma tarefa específica
     public void stopTask(Task task) {
         if (task != null && task.isRunning()) {
             task.stop();
-            taskHistory.add(task);
         }
     }
 
-    // Pausar uma tarefa específica
-    public void pauseTask(Task task) {
-        if (task != null && task.isRunning()) {
-            task.pause();
+    public void deleteTask(Task task, LocalDate date) {
+        ArrayList<Task> tasksForDate = tasksByDate.get(date);
+        if (tasksForDate != null) {
+            tasksForDate.remove(task);
         }
     }
 
-    // Retomar uma tarefa específica
-    public void resumeTask(Task task) {
-        if (task != null && !task.isRunning()) {
-            task.resume();
-        }
+    public Optional<Task> getActiveTaskByName(String name, LocalDate date) {
+        return Optional.ofNullable(tasksByDate.get(date))
+                .flatMap(tasks -> tasks.stream().filter(task -> task.getName().equals(name)).findFirst());
     }
 
-    public void deleteTask(Task task) {
-        activeTasks.remove(task);
-        taskHistory.remove(task);
+    public ArrayList<Task> getTasksByDate(LocalDate date) {
+        return tasksByDate.getOrDefault(date, new ArrayList<>());
     }
 
-    // Obter uma tarefa ativa pelo nome
-    public Optional<Task> getActiveTaskByName(String name) {
-        return activeTasks.stream().filter(task -> task.getName().equals(name)).findFirst();
+    public void logTask(Task task, LocalDate date) {
+        tasksByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(task);
+        saveTasks();
     }
-
-    // Obter uma lista de todas as tarefas ativas
-    public ArrayList<Task> getActiveTasks() {
-        return new ArrayList<>(activeTasks);
-    }
-
-    // Obter uma lista de todo o histórico de tarefas
-    public ArrayList<Task> getTaskHistory() {
-        return new ArrayList<>(taskHistory);
-    }
-
-    // Obter o tempo total gasto em todas as tarefas em minutos
-    public long getTotalTimeSpent() {
-        long total = 0;
-        for (Task task : taskHistory) {
-            total += task.getElapsedTimeInMinutes();
-        }
-        for (Task task : activeTasks) {
-            total += task.getElapsedTimeInMinutes();
-        }
-        return total;
-    }
-
-    public void logTask(Task task) {
-        if (task.getElapsedTimeInMinutes() == 0) {
-            activeTasks.add(task);
-        } else {
-            taskHistory.add(task);
-        }
-        saveTasks();  // Salvar tarefas após cada log
-    }
-
 }
