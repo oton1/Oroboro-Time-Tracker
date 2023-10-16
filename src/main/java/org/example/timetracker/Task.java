@@ -127,4 +127,11 @@ public class Task implements Serializable {
     }
 
 
+    public long getStartTime() {
+        return this.startTime;
+    }
+
+    public long getEndTime() {
+        return this.endTime;
+    }
 }

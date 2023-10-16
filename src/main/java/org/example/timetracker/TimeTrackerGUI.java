@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class TimeTrackerGUI {
     private JFrame frame;
@@ -64,6 +66,13 @@ public class TimeTrackerGUI {
         JButton deleteButton = new JButton("Deletar tarefa");
         JButton backButton = new JButton("<");
         JButton forwardButton = new JButton(">");
+        JButton editButton = new JButton("Editar tarefa");
+        editButton.setFont(modernFont);
+        editButton.setBackground(bgColor);
+        editButton.setForeground(fgColor);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(editButton);
+
         dateLabel = new JLabel(currentDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         Font dateFont = new Font("Helvetica", Font.PLAIN, 16);
         dateLabel.setFont(dateFont);
@@ -76,12 +85,13 @@ public class TimeTrackerGUI {
             btn.setForeground(fgColor);
         }
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(bgColor);
         buttonPanel.add(startButton);
         buttonPanel.add(stopButton);
         buttonPanel.add(logButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(editButton);
 
         backButton.setForeground(Color.WHITE);
         backButton.setBackground(bgColor);
@@ -106,7 +116,7 @@ public class TimeTrackerGUI {
         startButton.addActionListener((ActionEvent e) -> {
             String name = JOptionPane.showInputDialog("Nome da Tarefa:");
             LocalDate date = LocalDate.now();
-            Task newTask = taskManager.startTask("Nome da Tarefa", date);
+            Task newTask = taskManager.startTask(name, date);
             listModel.addElement(newTask);
         });
 
@@ -114,6 +124,30 @@ public class TimeTrackerGUI {
             Task selectedTask = taskList.getSelectedValue();
             if (selectedTask != null) {
                 taskManager.stopTask(selectedTask);
+                listModel.removeElement(selectedTask);
+                listModel.addElement(selectedTask);
+            }
+        });
+        editButton.addActionListener((ActionEvent e) -> {
+            Task selectedTask = taskList.getSelectedValue();
+            if (selectedTask != null) {
+                String newName = JOptionPane.showInputDialog("Novo nome da Tarefa:", selectedTask.getName());
+                if (newName != null) {
+                    selectedTask.setName(newName);
+                }
+
+                String newStartTimeStr = JOptionPane.showInputDialog("Nova hora de início (HH:MM):", new SimpleDateFormat("HH:mm").format(new Date(selectedTask.getStartTime())));
+                String newEndTimeStr = JOptionPane.showInputDialog("Nova hora de término (HH:MM):", new SimpleDateFormat("HH:mm").format(new Date(selectedTask.getEndTime())));
+
+                if (newStartTimeStr != null && newEndTimeStr != null) {
+                    try {
+                        selectedTask.setTime(newStartTimeStr, newEndTimeStr);
+                    } catch (Exception ex) {
+                        // Tratar exceção
+                    }
+                }
+
+                // Atualizar a lista após a edição
                 listModel.removeElement(selectedTask);
                 listModel.addElement(selectedTask);
             }
