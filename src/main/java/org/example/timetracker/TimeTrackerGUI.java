@@ -1,12 +1,20 @@
 package org.example.timetracker;
 
 import javax.swing.*;
-import java.awt.*;
+//import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.BorderLayout;
+import java.util.List;
 
 public class TimeTrackerGUI {
     private JFrame frame;
@@ -15,6 +23,8 @@ public class TimeTrackerGUI {
     private TaskManager taskManager;
     private LocalDate currentDate;
     private JLabel dateLabel;
+    private JLabel sumLabel;
+
 
     public TimeTrackerGUI(TaskManager taskManager) {
         this.taskManager = taskManager;
@@ -78,6 +88,14 @@ public class TimeTrackerGUI {
         dateLabel.setFont(dateFont);
         dateLabel.setForeground(Color.WHITE);  // Mudar a cor para branco
 
+        sumLabel = new JLabel("Total: 0h 0min");
+        sumLabel.setForeground(Color.WHITE);
+        sumLabel.setFont(new Font("Helvetica", Font.PLAIN, 16));
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bottomPanel.add(sumLabel);
+        bottomPanel.setBackground(new Color(40, 40, 40));
+
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);  // Adicione o novo painel na parte inferior
 
         for (JButton btn : new JButton[]{startButton, stopButton, logButton, deleteButton}) {
             btn.setFont(modernFont);
@@ -204,14 +222,27 @@ public class TimeTrackerGUI {
         dateNavigationPanel.add(forwardButton);
 
         topPanel.add(dateNavigationPanel, BorderLayout.WEST);
-
+        javax.swing.Timer timer = new javax.swing.Timer(1000, e -> updateDateAndTasks());
+        timer.start();
     }
     private void updateDateAndTasks() {
         dateLabel.setText(currentDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         listModel.clear();
+
+        long totalMinutes = 0;
+        List<Task> tasks = taskManager.getTasksByDate(currentDate);
+        Collections.sort(tasks, Comparator.comparingLong(Task::getStartTime));
         for (Task task : taskManager.getTasksByDate(currentDate)) {
             listModel.addElement(task);
+            totalMinutes += task.getElapsedTimeInMinutes();
         }
+        updateSumLabel(totalMinutes);  // Atualiza o JLabel sumLabel com a soma atual
+    }
+
+    private void updateSumLabel(long totalMinutes) {
+        long hours = totalMinutes / 60;
+        long minutes = totalMinutes % 60;
+        sumLabel.setText(String.format("Total: %dh %dmin", hours, minutes));
     }
 
 
