@@ -1,29 +1,28 @@
 package org.example.timetracker;
 
 import javax.swing.*;
-//import java.awt.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.BorderLayout;
 import java.util.List;
 
 public class TimeTrackerGUI {
-    private JFrame frame;
+    private static JFrame frame;
     private JList<Task> taskList;
     private DefaultListModel<Task> listModel;
     private TaskManager taskManager;
     private LocalDate currentDate;
     private JLabel dateLabel;
     private JLabel sumLabel;
+    private javax.swing.Timer timer;
+
 
 
     public TimeTrackerGUI(TaskManager taskManager) {
@@ -47,7 +46,7 @@ public class TimeTrackerGUI {
         // Modern Font
         Font modernFont = new Font("Helvetica", Font.PLAIN, 16);
 
-        frame = new JFrame("Gerenciador de exploração ☭");  // Símbolo de foice e martelo adicionado
+        frame = new JFrame("Oroboro Time Tracker");  // Símbolo de foice e martelo removido
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
@@ -131,6 +130,15 @@ public class TimeTrackerGUI {
 
         frame.add(mainPanel);
 
+        taskList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {  // Ignora eventos extras
+                if (taskList.getSelectedIndex() != -1) {
+                    timer.stop();  // Pausar o Timer
+                } else {
+                    timer.start();  // Reiniciar o Timer
+                }
+            }
+        });
         startButton.addActionListener((ActionEvent e) -> {
             String name = JOptionPane.showInputDialog("Nome da Tarefa:");
             LocalDate date = LocalDate.now();
@@ -169,6 +177,7 @@ public class TimeTrackerGUI {
                 listModel.removeElement(selectedTask);
                 listModel.addElement(selectedTask);
             }
+
         });
 
         deleteButton.addActionListener((ActionEvent e) -> {
@@ -222,8 +231,22 @@ public class TimeTrackerGUI {
         dateNavigationPanel.add(forwardButton);
 
         topPanel.add(dateNavigationPanel, BorderLayout.WEST);
-        javax.swing.Timer timer = new javax.swing.Timer(1000, e -> updateDateAndTasks());
+        timer = new javax.swing.Timer(1000, e -> updateDateAndTasks());
         timer.start();
+        taskList.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+                    Task selectedTask = taskList.getSelectedValue();
+                    if (selectedTask != null) {
+                        taskManager.deleteTask(selectedTask, currentDate);
+                        listModel.removeElement(selectedTask);
+                    }
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    taskList.clearSelection();
+                }
+            }
+        });
     }
     private void updateDateAndTasks() {
         dateLabel.setText(currentDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
@@ -255,8 +278,10 @@ public class TimeTrackerGUI {
         TimeTrackerGUI gui = new TimeTrackerGUI(taskManager);
 
         gui.show();
-
+        ImageIcon icon = new ImageIcon("C:\\Users\\USER\\Documents\\3113286.png");
+        frame.setIconImage(icon.getImage());
         Runtime.getRuntime().addShutdownHook(new Thread(taskManager::saveTasks));
+
     }
     private boolean isValidTimeFormat(String timeStr) {
         if (timeStr == null) return false;
