@@ -8,10 +8,8 @@ import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
+import java.util.*;
 
 public class TimeTrackerGUI {
     private static JFrame frame;
@@ -47,9 +45,17 @@ public class TimeTrackerGUI {
         Font modernFont = new Font("Helvetica", Font.PLAIN, 16);
 
         frame = new JFrame("Oroboro Time Tracker");  // Símbolo de foice e martelo removido
+        ImageIcon icon = new ImageIcon(getClass().getResource("/119445.png"));
+        if (icon.getImage() != null) {
+            frame.setIconImage(icon.getImage());
+        } else {
+            System.out.println("Ícone não encontrado");
+        }
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
+
+
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
@@ -278,8 +284,6 @@ public class TimeTrackerGUI {
         TimeTrackerGUI gui = new TimeTrackerGUI(taskManager);
 
         gui.show();
-        ImageIcon icon = new ImageIcon("C:\\Users\\USER\\Documents\\3113286.png");
-        frame.setIconImage(icon.getImage());
         Runtime.getRuntime().addShutdownHook(new Thread(taskManager::saveTasks));
 
     }
