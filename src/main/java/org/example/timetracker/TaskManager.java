@@ -26,6 +26,7 @@ public class TaskManager {
     }
 
     public void stopTask(Task task) {
+        System.out.println("stopTask called");
         if (task != null && task.isRunning()) {
             task.stop();
         }
