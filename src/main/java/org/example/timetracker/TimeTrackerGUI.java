@@ -52,7 +52,7 @@ public class TimeTrackerGUI {
             System.out.println("Ícone não encontrado");
         }
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
+        frame.setSize(900, 600);
         frame.setLocationRelativeTo(null);
 
 
@@ -145,7 +145,7 @@ public class TimeTrackerGUI {
                 }
             }
         });
-        startButton.addActionListener((ActionEvent e) -> {
+        startButton.addActionListener((ActionEvent e) -> {;
             String name = JOptionPane.showInputDialog("Nome da Tarefa:");
             LocalDate date = LocalDate.now();
             Task newTask = taskManager.startTask(name, date);
@@ -153,15 +153,28 @@ public class TimeTrackerGUI {
         });
 
         stopButton.addActionListener((ActionEvent e) -> {
-            Task selectedTask = taskList.getSelectedValue();
-            if (selectedTask != null) {
-                taskManager.stopTask(selectedTask);
-                listModel.removeElement(selectedTask);
-                listModel.addElement(selectedTask);
+            System.out.println("Stop button clicked");
+            System.out.println("taskList: " + taskList);  // Debugging line
+            System.out.println("listModel: " + listModel);  // Debugging line
+            System.out.println("taskManager: " + taskManager);  // Debugging line
+            if (taskList != null && listModel != null && taskManager != null) {
+                Task selectedTask = taskList.getSelectedValue();
+                System.out.println("Selected task: " + selectedTask);  // Debugging line
+                if (selectedTask != null) {
+                    System.out.println("Selected task end time: " + selectedTask.getEndTime());  // Debugging line
+                }
+                if (selectedTask != null && (selectedTask.getEndTime() == null || selectedTask.getEndTime() == 0)) {
+                    taskManager.stopTask(selectedTask);
+                    listModel.setElementAt(selectedTask, taskList.getSelectedIndex());
+                }
+            } else {
+                // Handle the null case
             }
         });
+
         editButton.addActionListener((ActionEvent e) -> {
             Task selectedTask = taskList.getSelectedValue();
+            System.out.println("Selected task: " + selectedTask);  // Debugging line
             if (selectedTask != null) {
                 String newName = JOptionPane.showInputDialog("Novo nome da Tarefa:", selectedTask.getName());
                 if (newName != null) {
@@ -208,19 +221,22 @@ public class TimeTrackerGUI {
             if (startTimeStr == null) return;  // User cancelled
 
             while (true) {
-                endTimeStr = JOptionPane.showInputDialog("Hora de término (HH:MM):");
-                if (endTimeStr == null) break;  // User cancelled
-                if (isValidTimeFormat(endTimeStr)) break;
+                endTimeStr = JOptionPane.showInputDialog("Hora de término (HH:MM): (deixe em branco se a tarefa estiver em andamento)");
+                if (endTimeStr == null || endTimeStr.isEmpty() || isValidTimeFormat(endTimeStr)) break;
                 JOptionPane.showMessageDialog(frame, "Apenas horas são permitidas nesse campo. Formato: HH ou HH:mm");
             }
 
-            if (endTimeStr == null) return;  // User cancelled
-
             Task newTask = new Task(name, currentDate);
-            newTask.setTime(startTimeStr, endTimeStr);
+            if (endTimeStr == null || endTimeStr.isEmpty()) {
+                newTask.setTime(startTimeStr, null);  // Set only start time
+            } else {
+                newTask.setTime(startTimeStr, endTimeStr);  // Set both start and end time
+            }
             taskManager.logTask(newTask, currentDate);
             listModel.addElement(newTask);
         });
+
+
         backButton.addActionListener(e -> {
             currentDate = currentDate.minusDays(1);
             updateDateAndTasks();
