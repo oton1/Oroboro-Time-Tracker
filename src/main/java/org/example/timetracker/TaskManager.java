@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class TaskManager {
-    private Map<LocalDate, ArrayList<Task>> tasksByDate;
-    private TaskStorage taskStorage;
+    private final Map<LocalDate, ArrayList<Task>> tasksByDate;
+    private final TaskStorage taskStorage;
 
     public TaskManager() {
         this.taskStorage = new TaskStorage();

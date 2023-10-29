@@ -18,11 +18,14 @@ public class Task implements Serializable {
     private boolean isRunning;
 
     public Task(String name, LocalDate date) {
+        System.out.println("Constructor: Setting initial values");
         this.name = name;
         this.date = date;
-        this.totalElapsedTime = 0;
         this.isRunning = false;
+        System.out.println("Constructor: startTime = " + this.startTime);
+        System.out.println("Constructor: totalElapsedTime = " + this.totalElapsedTime);
     }
+
 
     public void start() {
         this.startTime = System.currentTimeMillis();
@@ -31,10 +34,7 @@ public class Task implements Serializable {
 
     public void stop() {
         this.endTime = System.currentTimeMillis();
-        long elapsed = endTime - startTime;
-        if (elapsed > 0) {
-            this.totalElapsedTime += elapsed;
-        }
+        this.totalElapsedTime += (this.endTime - this.startTime);
         this.isRunning = false;
     }
 
@@ -50,12 +50,26 @@ public class Task implements Serializable {
     }
 
     public long getElapsedTimeInMinutes() {
-        long elapsedTime = this.totalElapsedTime;
-        if (isRunning) {
-            elapsedTime += (System.currentTimeMillis() - startTime);
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+
+        long currentEndTime = isRunning ? System.currentTimeMillis() : this.endTime;
+        long timeOffsetMillis = 3 * 60 * 60 * 1000; // 3 horas em milissegundos
+
+        try {
+            Date startDate = sdf.parse(sdf.format(new Date(this.startTime - timeOffsetMillis)));
+            Date endDate = sdf.parse(sdf.format(new Date(currentEndTime - timeOffsetMillis)));
+
+            long elapsedTime = endDate.getTime() - startDate.getTime();
+
+            return elapsedTime / 60000;
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return 0;
         }
-        return elapsedTime / 60000;
     }
+
+
 
     public String getName() {
         return name;
@@ -102,29 +116,33 @@ public class Task implements Serializable {
     public void setTime(String startTimeStr, String endTimeStr) {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         try {
-            // Garante que as horas e minutos tenham dois dígitos
+            // Handle start time
             String[] startParts = startTimeStr.split(":");
-            String[] endParts = endTimeStr.split(":");
-
             String startHour = (startParts[0].length() == 1) ? "0" + startParts[0] : startParts[0];
             String startMinute = (startParts.length > 1) ? startParts[1] : "00";
-
-            String endHour = (endParts[0].length() == 1) ? "0" + endParts[0] : endParts[0];
-            String endMinute = (endParts.length > 1) ? endParts[1] : "00";
-
             startTimeStr = startHour + ":" + startMinute;
-            endTimeStr = endHour + ":" + endMinute;
-
             Date startDate = sdf.parse(startTimeStr);
-            Date endDate = sdf.parse(endTimeStr);
             this.startTime = startDate.getTime();
-            this.endTime = endDate.getTime();
-            this.totalElapsedTime = this.endTime - this.startTime;
-            this.isRunning = false;
+
+            // Handle end time only if it's not null or empty
+            if (endTimeStr != null && !endTimeStr.isEmpty()) {
+                String[] endParts = endTimeStr.split(":");
+                String endHour = (endParts[0].length() == 1) ? "0" + endParts[0] : endParts[0];
+                String endMinute = (endParts.length > 1) ? endParts[1] : "00";
+                endTimeStr = endHour + ":" + endMinute;
+                Date endDate = sdf.parse(endTimeStr);
+                this.endTime = endDate.getTime();
+                this.totalElapsedTime = this.endTime - this.startTime;
+                this.isRunning = false;
+            } else {
+                this.endTime = 0;  // or some other default value to indicate "in progress"
+                this.isRunning = true;
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
     }
+
 
 
     public long getStartTime() {

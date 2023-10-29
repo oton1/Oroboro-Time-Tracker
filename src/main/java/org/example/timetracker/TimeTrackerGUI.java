@@ -195,32 +195,30 @@ public class TimeTrackerGUI {
         });
         logButton.addActionListener((ActionEvent e) -> {
             String name = JOptionPane.showInputDialog("Nome da Tarefa:");
-            String startTimeStr;
-            String endTimeStr;
+            String startTimeStr = null;
+            String endTimeStr = null;
 
             while (true) {
                 startTimeStr = JOptionPane.showInputDialog("Hora de início (HH:MM):");
-                if (startTimeStr == null) break;  // User cancelled
+                if (startTimeStr == null) return; // User cancelled
                 if (isValidTimeFormat(startTimeStr)) break;
                 JOptionPane.showMessageDialog(frame, "Apenas horas são permitidas nesse campo. Formato: HH ou HH:mm");
             }
 
-            if (startTimeStr == null) return;  // User cancelled
-
+            // Permite que endTimeStr seja null ou vazio
             while (true) {
-                endTimeStr = JOptionPane.showInputDialog("Hora de término (HH:MM):");
-                if (endTimeStr == null) break;  // User cancelled
+                endTimeStr = JOptionPane.showInputDialog("Hora de término (HH:MM): (Deixe em branco se a tarefa estiver em andamento)");
+                if (endTimeStr == null || endTimeStr.isEmpty()) break; // User cancelled or left it empty
                 if (isValidTimeFormat(endTimeStr)) break;
                 JOptionPane.showMessageDialog(frame, "Apenas horas são permitidas nesse campo. Formato: HH ou HH:mm");
             }
 
-            if (endTimeStr == null) return;  // User cancelled
-
             Task newTask = new Task(name, currentDate);
-            newTask.setTime(startTimeStr, endTimeStr);
+            newTask.setTime(startTimeStr, endTimeStr); // Assegure-se que seu método setTime possa lidar com endTimeStr sendo null ou vazio
             taskManager.logTask(newTask, currentDate);
             listModel.addElement(newTask);
         });
+
         backButton.addActionListener(e -> {
             currentDate = currentDate.minusDays(1);
             updateDateAndTasks();
