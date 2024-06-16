@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class Task implements Serializable {
-   // @Serial
     private static final long serialVersionUID = 1L;
     private String name;
     private LocalDate date;
@@ -25,7 +24,6 @@ public class Task implements Serializable {
         System.out.println("Constructor: startTime = " + this.startTime);
         System.out.println("Constructor: totalElapsedTime = " + this.totalElapsedTime);
     }
-
 
     public void start() {
         this.startTime = System.currentTimeMillis();
@@ -49,27 +47,15 @@ public class Task implements Serializable {
         this.isRunning = true;
     }
 
+    // Método para obter o tempo total gasto em minutos
     public long getElapsedTimeInMinutes() {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-
-        long currentEndTime = isRunning ? System.currentTimeMillis() : this.endTime;
-        long timeOffsetMillis = 3 * 60 * 60 * 1000; // 3 horas em milissegundos
-
-        try {
-            Date startDate = sdf.parse(sdf.format(new Date(this.startTime - timeOffsetMillis)));
-            Date endDate = sdf.parse(sdf.format(new Date(currentEndTime - timeOffsetMillis)));
-
-            long elapsedTime = endDate.getTime() - startDate.getTime();
-
-            return elapsedTime / 60000;
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return 0;
-        }
+        return totalElapsedTime / 60000;
     }
 
-
+    // Método para obter o tempo total gasto em horas
+    public double getElapsedTimeInHours() {
+        return totalElapsedTime / 3600000.0;
+    }
 
     public String getName() {
         return name;
@@ -142,8 +128,6 @@ public class Task implements Serializable {
             e.printStackTrace();
         }
     }
-
-
 
     public long getStartTime() {
         return this.startTime;

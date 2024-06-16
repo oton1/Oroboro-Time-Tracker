@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 
+
 public class TimeTrackerGUI {
     private static JFrame frame;
     private JList<Task> taskList;
@@ -18,6 +19,8 @@ public class TimeTrackerGUI {
     private TaskManager taskManager;
     private LocalDate currentDate;
     private JLabel dateLabel;
+    private JLabel taskDetailsLabel;
+
     private JLabel sumLabel;
     private javax.swing.Timer timer;
 
@@ -259,12 +262,13 @@ public class TimeTrackerGUI {
         long totalMinutes = 0;
         List<Task> tasks = taskManager.getTasksByDate(currentDate);
         Collections.sort(tasks, Comparator.comparingLong(Task::getStartTime));
-        for (Task task : taskManager.getTasksByDate(currentDate)) {
+        for (Task task : tasks) {
             listModel.addElement(task);
             totalMinutes += task.getElapsedTimeInMinutes();
         }
         updateSumLabel(totalMinutes);  // Atualiza o JLabel sumLabel com a soma atual
     }
+
 
     private void updateSumLabel(long totalMinutes) {
         long hours = totalMinutes / 60;
