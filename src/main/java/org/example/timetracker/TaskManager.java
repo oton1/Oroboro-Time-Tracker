@@ -51,4 +51,26 @@ public class TaskManager {
         tasksByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(task);
         saveTasks();
     }
+
+    public long getTotalTimeSpentOnTask(String taskName) {
+        long totalElapsedTime = 0;
+        for (ArrayList<Task> tasks : tasksByDate.values()) {
+            for (Task task : tasks) {
+                if (task.getName().equals(taskName)) {
+                    totalElapsedTime += task.getElapsedTimeInMinutes();
+                }
+            }
+        }
+        return totalElapsedTime;
+    }
+
+    public long getTotalTimeSpent() {
+        long totalElapsedTime = 0;
+        for (ArrayList<Task> tasks : tasksByDate.values()) {
+            for (Task task : tasks) {
+                totalElapsedTime += task.getElapsedTimeInMinutes();
+            }
+        }
+        return totalElapsedTime;
+    }
 }
